@@ -24,4 +24,4 @@ prompt_template = ChatPromptTemplate([
     ("system", system_prompt)
 ], partial_variables={"format_instructions": parser.get_format_instructions()})
 
-chain = prompt_template | model | parser
+chain_classifier = prompt_template | model | parser
