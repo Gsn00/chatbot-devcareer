@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
 
 load_dotenv()
@@ -27,7 +27,7 @@ Mantenha a resposta entre 3 a 5 parágrafos. Seja abrangente e útil.
 
 prompt_template = ChatPromptTemplate([
     ("system", system_prompt),
-    ##TODO: Placeholder do history
+    MessagesPlaceholder(variable_name="history"),
     ("human", "{input}")
 ])
 

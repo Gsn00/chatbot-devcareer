@@ -1,14 +1,18 @@
 from chain_classifier import chain_classifier
-from langchain_core.runnables import RunnableLambda, RunnableParallel
+from langchain_core.runnables import RunnableLambda, RunnableParallel, RunnablePassthrough
 from chain_programming_language import chain_programming_language
 from chain_development_area import chain_development_area
 from chain_interview_preparation import chain_interview_preparation
 from chain_study_resources import chain_study_resources
 from chain_general_topics import chain_general_topics
+from langchain_core.runnables import RunnableWithMessageHistory
+from history_manager import get_session_history, trimmer
 from operator import itemgetter
 
 def classify_route(input: dict):
     option = input["option"].option
+    
+    print(f"\n\n{input}\n\n")
     
     print(f"\n>> Pergunta do Usuário: {input["input"]}")
     match option:
@@ -29,8 +33,11 @@ def classify_route(input: dict):
             return chain_general_topics
             
 
-chain = RunnableParallel({"input": itemgetter("input"), "option": chain_classifier}) | RunnableLambda(classify_route)
+chain = RunnablePassthrough.assign(history=itemgetter("history") | trimmer) | RunnableParallel({"input": itemgetter("input"), "history": itemgetter("history"), "option": chain_classifier}) | RunnableLambda(classify_route)
 
-result = chain.invoke({"input":"Quais assuntos estão em alta em 2026 e que serão usados nos próximos anos?"})
-
-print(result)
+runnable_with_history = RunnableWithMessageHistory(
+    chain,
+    get_session_history,
+    input_messages_key="input",
+    history_messages_key="history"
+)
